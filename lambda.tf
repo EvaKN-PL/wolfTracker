@@ -45,6 +45,16 @@ resource "aws_iam_policy" "lambda_dynamodb" {
         Effect   = "Allow"
         Resource = aws_dynamodb_table.tracker_db.arn
       },
+
+        {
+        Action = [
+          "s3:PutObject",
+          "s3:GetObject"
+        ]
+        Effect   = "Allow"
+        Resource = "${aws_s3_bucket.photo.arn}/*"
+      },
+
       {
         Action = [
           "logs:CreateLogGroup",
@@ -84,6 +94,7 @@ resource "aws_lambda_function" "main" {
       ENVIRONMENT = var.env
       LOG_LEVEL   = "info"
       TABLE_NAME  = aws_dynamodb_table.tracker_db.name
+      PHOTO_BUCKET = aws_s3_bucket.photo.id
     }
   }
 
