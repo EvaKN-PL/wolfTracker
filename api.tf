@@ -7,10 +7,10 @@ resource "aws_apigatewayv2_integration" "main" {
   api_id           = aws_apigatewayv2_api.main.id
   integration_type = "AWS_PROXY"
 
-  description               = "Lambda"
-  integration_uri           = aws_lambda_function.main.invoke_arn
+  description            = "Lambda"
+  integration_uri        = aws_lambda_function.main.invoke_arn
   payload_format_version = "2.0"
-  
+
 }
 
 resource "aws_apigatewayv2_route" "example" {
@@ -21,17 +21,17 @@ resource "aws_apigatewayv2_route" "example" {
 }
 
 resource "aws_apigatewayv2_stage" "main" {
-    api_id = aws_apigatewayv2_api.main.id
-    name = "$default"
-    auto_deploy = true
-  
+  api_id      = aws_apigatewayv2_api.main.id
+  name        = "$default"
+  auto_deploy = true
+
 }
 
 resource "aws_lambda_permission" "api_gw" {
-    statement_id  = "AllowExecutionFromAPIGateway"
-    action        = "lambda:InvokeaFunction"
-    function_name = aws_lambda_function.main.function_name
-    principal     = "apigateway.amazon.com"
-    source_arn    = "${aws_apigatewayv2_api.main.execution_arn}/*/*"
-  
+  statement_id  = "AllowExecutionFromAPIGateway"
+  action        = "lambda:InvokeaFunction"
+  function_name = aws_lambda_function.main.function_name
+  principal     = "apigateway.amazon.com"
+  source_arn    = "${aws_apigatewayv2_api.main.execution_arn}/*/*"
+
 }

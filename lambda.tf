@@ -26,14 +26,14 @@ data "archive_file" "main" {
 
 # Policy definition for DynamoDB
 resource "aws_iam_policy" "lambda_dynamodb" {
-    name        = "${var.env}-lambda-dynamodb-policy"
-    description = "Allow write tracks to DynamoDB"
+  name        = "${var.env}-lambda-dynamodb-policy"
+  description = "Allow write tracks to DynamoDB"
 
-    policy = jsonencode({
-    Version   = "2012-10-17"
+  policy = jsonencode({
+    Version = "2012-10-17"
     Statement = [
       {
-        Action   = [
+        Action = [
           "dynamodb:PutItem",
           "dynamodb:GetItem"
         ]
@@ -54,9 +54,9 @@ resource "aws_iam_policy" "lambda_dynamodb" {
 }
 
 resource "aws_iam_role_policy_attachment" "lambda_attach" {
-    role       = aws_iam_role.main.name
-    policy_arn = aws_iam_policy.lambda_dynamodb.arn
-  
+  role       = aws_iam_role.main.name
+  policy_arn = aws_iam_policy.lambda_dynamodb.arn
+
 }
 
 # Lambda function
@@ -84,4 +84,4 @@ resource "aws_lambda_function" "main" {
 }
 
 
-  
+
