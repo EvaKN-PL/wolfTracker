@@ -28,10 +28,10 @@ resource "aws_apigatewayv2_stage" "main" {
 }
 
 resource "aws_lambda_permission" "api_gw" {
-    statement_id = "AllowExecutionFromAPIGateway"
-    action = "lambda:InvokeaFunction"
+    statement_id  = "AllowExecutionFromAPIGateway"
+    action        = "lambda:InvokeaFunction"
     function_name = aws_lambda_function.main.function_name
-    principal = "apigateway.amazon.com"
-    source_arn = "${aws_apigatewayv2_api.main.execution_arn}/*/*"
+    principal     = "apigateway.amazon.com"
+    source_arn    = "${aws_apigatewayv2_api.main.execution_arn}/*/*"
   
 }
