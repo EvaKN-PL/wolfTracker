@@ -31,7 +31,7 @@ resource "aws_lambda_permission" "api_gw" {
   statement_id  = "AllowExecutionFromAPIGateway"
   action        = "lambda:InvokeaFunction"
   function_name = aws_lambda_function.main.function_name
-  principal     = "apigateway.amazon.com"
+  principal     = "apigateway.amazonaws.com"
   source_arn    = "${aws_apigatewayv2_api.main.execution_arn}/*/*"
 
 }
