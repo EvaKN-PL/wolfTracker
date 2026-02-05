@@ -3,12 +3,13 @@ import boto3
 import uuid
 import os
 
-dynamodb = boto3.resource('dynamodb')
-table = dynamodb.Table(os.environ['TABLE_NAME'])
-
 
 def handler(event, context):
     try:
+        dynamodb = boto3.resource('dynamodb')
+        table_name = os.environ.get('TABLE_NAME')
+        table = dynamodb.Table(table_name)
+
         if 'body' not in event:
             raw_data = event 
         else:
