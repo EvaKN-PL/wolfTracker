@@ -24,6 +24,11 @@ data "archive_file" "main" {
   output_path = "${path.module}/function.zip"
 }
 
+resource "aws_cloudwatch_log_group" "lambda_log_group" {
+  name              = "/aws/lambda/${aws_lambda_function.main.function_name}"
+  retention_in_days = 10
+}
+
 # Policy definition for DynamoDB
 resource "aws_iam_policy" "lambda_dynamodb" {
   name        = "${var.env}-lambda-dynamodb-policy"
