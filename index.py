@@ -6,7 +6,7 @@ import os
 s3_client = boto3.client('s3')
 dynamodb = boto3.resource('dynamodb')
 
-BUCKET_NAME = os.environ.get('BUCKET_NAME')
+BUCKET_NAME = os.environ.get('PHOTO_BUCKET')
 TABLE_NAME = os.environ.get('TABLE_NAME')
 
 
