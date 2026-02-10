@@ -11,17 +11,14 @@ def handler(event, context):
     try:
         table = dynamodb.Table(TABLE_NAME)
 
-        # Pobieramy parametry z zapytania URL (np. ?startDate=2026-01-01)
         query_params = event.get('queryStringParameters', {}) or {}
         start_date = query_params.get('startDate')
 
         if start_date:
-            # Pobierz tylko wpisy nowsze niż start_date
             response = table.scan(
                 FilterExpression=Attr('date').gt(start_date)
             )
         else:
-            # Jeśli brak parametru, domyślnie pobierz np. ostatnie 20
             response = table.scan(Limit=50)
 
         items = response.get('Items', [])
