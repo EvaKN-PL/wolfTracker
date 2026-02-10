@@ -20,6 +20,8 @@ def handler(event, context):
         else:
             body = event.get('body', {})
 
+        print(f"Parsed body: {body}") 
+
         date = body.get('date')
         track_type = body.get('trackType', 'unknown')
         location = body.get('location', '0,0')
@@ -29,7 +31,8 @@ def handler(event, context):
         upload_url = None
         photo_key = None
 
-        if has_photo is True and BUCKET_NAME:
+        if has_photo and BUCKET_NAME:
+            print(f"Generating presigned URL for report: {report_id}")
             photo_key = f"photos/{report_id}.jpg"
             upload_url = s3_client.generate_presigned_url(
                 'put_object',
@@ -49,8 +52,10 @@ def handler(event, context):
             'location': location
         }
 
+        # Jeśli photo_key został wygenerowany, dodajemy link do bazy
         if photo_key:
             item['photoUrl'] = f"https://{BUCKET_NAME}.s3.amazonaws.com/{photo_key}"
+            print(f"Added photoUrl to item: {item['photoUrl']}")
 
         table.put_item(Item=item)
 
