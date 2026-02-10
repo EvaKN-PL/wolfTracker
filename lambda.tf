@@ -20,7 +20,7 @@ resource "aws_iam_role" "main" {
 
 data "archive_file" "main" {
   type        = "zip"
-  source_file = "${path.module}/index.py"
+  source_file = "${path.module}/lambda_codes"
   output_path = "${path.module}/function.zip"
 }
 
@@ -40,7 +40,9 @@ resource "aws_iam_policy" "lambda_dynamodb" {
       {
         Action = [
           "dynamodb:PutItem",
-          "dynamodb:GetItem"
+          "dynamodb:GetItem",
+          "dynamodb:Scan",
+          "dynamodb:Query"
         ]
         Effect   = "Allow"
         Resource = aws_dynamodb_table.tracker_db.arn

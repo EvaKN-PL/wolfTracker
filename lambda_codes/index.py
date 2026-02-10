@@ -6,6 +6,7 @@ import os
 s3_client = boto3.client('s3')
 dynamodb = boto3.resource('dynamodb')
 
+
 BUCKET_NAME = os.environ.get('PHOTO_BUCKET')
 TABLE_NAME = os.environ.get('TABLE_NAME')
 
@@ -14,25 +15,23 @@ def handler(event, context):
     print(f"Received event: {json.dumps(event)}")
 
     try:
-        # Safe body parsing
         if isinstance(event.get('body'), str):
             body = json.loads(event['body'])
         else:
             body = event.get('body', {})
 
-        print(f"Parsed body: {body}") 
-
         date = body.get('date')
         track_type = body.get('trackType', 'unknown')
         location = body.get('location', '0,0')
         has_photo = body.get('hasPhoto', False)
+        notes = body.get('notes', '')
 
         report_id = str(uuid.uuid4())
         upload_url = None
         photo_key = None
 
+        # Logika S3
         if has_photo and BUCKET_NAME:
-            print(f"Generating presigned URL for report: {report_id}")
             photo_key = f"photos/{report_id}.jpg"
             upload_url = s3_client.generate_presigned_url(
                 'put_object',
@@ -44,18 +43,18 @@ def handler(event, context):
                 ExpiresIn=3600
             )
 
+        # Zapis do DynamoDB
         table = dynamodb.Table(TABLE_NAME)
         item = {
             'report_id': report_id,
             'date': date,
             'trackType': track_type,
-            'location': location
+            'location': location,
+            'notes': notes
         }
 
-        # Jeśli photo_key został wygenerowany, dodajemy link do bazy
         if photo_key:
             item['photoUrl'] = f"https://{BUCKET_NAME}.s3.amazonaws.com/{photo_key}"
-            print(f"Added photoUrl to item: {item['photoUrl']}")
 
         table.put_item(Item=item)
 
@@ -68,7 +67,7 @@ def handler(event, context):
                 'Access-Control-Allow-Methods': 'OPTIONS,POST'
             },
             'body': json.dumps({
-                'message': 'Report processed',
+                'message': 'Report saved',
                 'report_id': report_id,
                 'upload_url': upload_url
             })
