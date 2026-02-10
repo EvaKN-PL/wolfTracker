@@ -1,48 +1,60 @@
 import json
 import boto3
-import os
 import uuid
-from botocore.config import Config
+import os
 
-
-s3_client = boto3.client('s3', config=Config(signature_version='s3v4'))
+# Inicjalizacja klientów AWS
+s3_client = boto3.client('s3')
 dynamodb = boto3.resource('dynamodb')
 
+# Pobieranie nazw z Terraform (zmienne środowiskowe)
+BUCKET_NAME = os.environ.get('BUCKET_NAME')
+TABLE_NAME = os.environ.get('TABLE_NAME')
 
-def handler(event, context):
+
+def lambda_handler(event, context):
     try:
-        table_name = os.environ.get('TABLE_NAME')
-        bucket_name = os.environ.get('PHOTO_BUCKET')
-        table = dynamodb.Table(table_name)
+        # Parsowanie danych z aplikacji
+        body = json.loads(event['body'])
 
-        body = event.get('body', '{}')
-        data = json.loads(body) if isinstance(body, str) else body
+        # Wyciągamy dane i nową flagę hasPhoto
+        date = body.get('date')
+        track_type = body.get('trackType')
+        location = body.get('location')
+        # Domyślnie False jeśli brak klucza
+        has_photo = body.get('hasPhoto', False)
 
         report_id = str(uuid.uuid4())
-        # Create unique name for s3 file
-        file_name = f"photos/{report_id}.jpg"
+        upload_url = None
+        photo_key = None
 
-        # Generate a Presigned URL to PUT the file
-        upload_url = s3_client.generate_presigned_url(
-            'put_object',
-            Params={
-                'Bucket': bucket_name,
-                'Key': file_name,
-                'ContentType': 'image/jpeg'
-            },
-            ExpiresIn=300
-        )
+        # LOGIKA: Generujemy URL tylko jeśli has_photo jest True
+        if has_photo and BUCKET_NAME:
+            photo_key = f"photos/{report_id}.jpg"
+            upload_url = s3_client.generate_presigned_url(
+                'put_object',
+                Params={
+                    'Bucket': BUCKET_NAME,
+                    'Key': photo_key,
+                    'ContentType': 'image/jpeg'
+                },
+                ExpiresIn=3600
+            )
 
-        # We save the data in DynamoDB (along with the path to the image)
+        # Przygotowanie rekordu do bazy DynamoDB
+        table = dynamodb.Table(TABLE_NAME)
         item = {
-            'report_id': report_id,
-            'date': data.get('date', 'no-date'),
-            'track_type': data.get('trackType', 'unknown'),
-            'location': data.get('location', '0,0'),
-            'photo_key': file_name,  # Ścieżka w S3
-            'photo_url': f"https://{bucket_name}.s3.amazonaws.com/{file_name}"
+            'reportId': report_id,
+            'date': date,
+            'trackType': track_type,
+            'location': location
         }
 
+        # Dodajemy informację o zdjęciu tylko jeśli faktycznie istnieje
+        if photo_key:
+            item['photoUrl'] = f"https://{BUCKET_NAME}.s3.amazonaws.com/{photo_key}"
+
+        # Zapis w bazie
         table.put_item(Item=item)
 
         return {
@@ -52,13 +64,18 @@ def handler(event, context):
                 'Access-Control-Allow-Origin': '*'
             },
             'body': json.dumps({
-                "status": "sukces",
-                "report_id": report_id,
-                "upload_url": upload_url  
+                'message': 'Report saved successfully',
+                'report_id': report_id,
+                'upload_url': upload_url 
             })
         }
+
     except Exception as e:
+        print(f"Error: {str(e)}")
         return {
             'statusCode': 500,
-            'body': json.dumps({"error": str(e)})
+            'headers': {
+                'Access-Control-Allow-Origin': '*'
+            },
+            'body': json.dumps({'error': 'Internal Server Error'})
         }
