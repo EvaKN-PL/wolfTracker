@@ -43,7 +43,7 @@ def handler(event, context):
 
         table = dynamodb.Table(TABLE_NAME)
         item = {
-            'reportId': report_id,
+            'report_id': report_id,
             'date': date,
             'trackType': track_type,
             'location': location
