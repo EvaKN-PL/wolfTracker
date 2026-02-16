@@ -9,8 +9,8 @@ resource "aws_lambda_function" "delete_reports" {
 
   environment {
     variables = {
-      LOG_LEVEL   = "info"
-      TABLE_NAME  = aws_dynamodb_table.tracker_db.name
+      LOG_LEVEL  = "info"
+      TABLE_NAME = aws_dynamodb_table.tracker_db.name
     }
   }
 

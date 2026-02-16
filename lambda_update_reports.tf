@@ -21,7 +21,7 @@ resource "aws_lambda_function" "update_reports" {
 }
 
 resource "aws_lambda_permission" "update_report_api" {
-  statement_id  = "AllowExecutionFromAPIGateway"
+  statement_id  = "AllowExecutionFromAPIGatewayUpdate"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.update_reports.function_name
   principal     = "apigateway.amazonaws.com"
