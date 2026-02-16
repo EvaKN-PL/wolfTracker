@@ -90,6 +90,7 @@ resource "aws_lambda_function" "main" {
   role          = aws_iam_role.main.arn
   handler       = "index.handler"
   code_sha256   = data.archive_file.main.output_base64sha256
+  timeout = 20
 
   runtime = "python3.12"
 
