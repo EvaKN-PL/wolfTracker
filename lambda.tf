@@ -43,7 +43,8 @@ resource "aws_iam_policy" "lambda_dynamodb" {
           "dynamodb:GetItem",
           "dynamodb:Scan",
           "dynamodb:Query",
-          "dynamodb:UpdateItem"
+          "dynamodb:UpdateItem",
+          "dynamodb:DeleteItem"
         ]
         Effect   = "Allow"
         Resource = aws_dynamodb_table.tracker_db.arn
