@@ -1,3 +1,4 @@
+# creating Dynamo DB table
 resource "aws_dynamodb_table" "tracker_db" {
   name         = "${var.env}-Tracker"
   billing_mode = "PAY_PER_REQUEST"
